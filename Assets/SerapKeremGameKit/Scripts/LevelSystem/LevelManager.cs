@@ -208,7 +208,28 @@ namespace SerapKeremGameKit._Managers
         private void PerformInitialValidation()
         {
             if (_levels == null || _levels.Length == 0)
-                TraceLogger.LogWarning($"{name}: Levels array is not configured.", this);
+            {
+                TraceLogger.Log("Level array empty, attempting to load from Resources/Levels...", this);
+                _levels = Resources.LoadAll<Level>("Levels");
+                
+                // Sort levels by name so they appear in order (Level 1, Level 2, etc.)
+                System.Array.Sort(_levels, (a, b) => {
+                    return AlphanumComparator.Compare(a.name, b.name);
+                });
+            }
+
+            if (_levels == null || _levels.Length == 0)
+                TraceLogger.LogWarning($"{name}: Levels array is not configured and no levels found in Resources/Levels.", this);
+        }
+
+        // Helper class for natural sorting (Level 2 before Level 10)
+        public static class AlphanumComparator
+        {
+            public static int Compare(string x, string y)
+            {
+                if (x == null || y == null) return 0;
+                return string.Compare(x, y, System.StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         private void ConfigureEnvironment()
