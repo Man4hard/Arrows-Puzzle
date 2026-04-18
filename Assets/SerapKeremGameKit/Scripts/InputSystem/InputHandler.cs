@@ -17,52 +17,54 @@ namespace SerapKeremGameKit._InputSystem
         protected override void Awake()
         {
             base.Awake();
-
-            //if (LoadingPanelController.Instance)
-            //{
-            //    LockInput();
-            //    LoadingPanelController.Instance.OnLoadingFinished += UnlockInput;
-            //}
         }
 
         private void Update()
         {
-            if (_isInputLocked) return; // Skip processing if input is locked
+            if (_isInputLocked) return; 
+            
             _playerInput.ResetFrame();
             ProcessMouseInput();
         }
 
         private void ProcessMouseInput()
         {
-            Vector3 mousePosition = Input.mousePosition;
-
-            if (Input.GetMouseButtonDown(0))
+            // Use Touch input if available for faster response on mobile
+            if (Input.touchCount > 0)
             {
-                HandleMouseDown(mousePosition);
+                Touch touch = Input.GetTouch(0);
+                Vector3 touchPos = touch.position;
+
+                if (touch.phase == TouchPhase.Began)
+                {
+                    _playerInput.SetMouseDown(touchPos);
+                }
+                else if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
+                {
+                    _playerInput.SetMouseHeld(touchPos);
+                }
+                else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                {
+                    _playerInput.SetMouseUp(touchPos);
+                }
             }
-            else if (Input.GetMouseButton(0))
+            else // Fallback to Mouse input for Editor and non-touch devices
             {
-                HandleMouseHeld(mousePosition);
+                Vector3 mousePosition = Input.mousePosition;
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    _playerInput.SetMouseDown(mousePosition);
+                }
+                else if (Input.GetMouseButton(0))
+                {
+                    _playerInput.SetMouseHeld(mousePosition);
+                }
+                else if (Input.GetMouseButtonUp(0))
+                {
+                    _playerInput.SetMouseUp(mousePosition);
+                }
             }
-            else if (Input.GetMouseButtonUp(0))
-            {
-                HandleMouseUp(mousePosition);
-            }
-        }
-
-        private void HandleMouseDown(Vector3 position)
-        {
-            _playerInput.SetMouseDown(position);
-        }
-
-        private void HandleMouseHeld(Vector3 position)
-        {
-            _playerInput.SetMouseHeld(position);
-        }
-
-        private void HandleMouseUp(Vector3 position)
-        {
-            _playerInput.SetMouseUp(position);
         }
 
         public void UnlockInput()

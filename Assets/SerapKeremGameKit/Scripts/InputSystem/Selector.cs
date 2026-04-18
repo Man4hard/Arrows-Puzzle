@@ -35,9 +35,21 @@ namespace SerapKeremGameKit._InputSystem
         private void Update()
         {
             if (_playerInputSO == null) return;
-            if (_playerInputSO.DownThisFrame) HandleSelectStart(_playerInputSO.MousePosition);
-            else if (_playerInputSO.Held) HandleDrag(_playerInputSO.MousePosition);
-            else if (_playerInputSO.UpThisFrame) HandleRelease(_playerInputSO.MousePosition);
+            
+            // Priority handling for DownThisFrame to ensure instant response
+            if (_playerInputSO.DownThisFrame) 
+            {
+                HandleSelectStart(_playerInputSO.MousePosition);
+            }
+            
+            if (_playerInputSO.Held) 
+            {
+                HandleDrag(_playerInputSO.MousePosition);
+            }
+            else if (_playerInputSO.UpThisFrame) 
+            {
+                HandleRelease(_playerInputSO.MousePosition);
+            }
         }
 
         private void ValidateReferences()

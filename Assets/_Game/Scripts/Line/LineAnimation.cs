@@ -165,6 +165,11 @@ namespace _Game.Line
                     line.positionCount = 0;
                     _isPlaying = false;
                     enabled = false;
+                    
+                    // Force disable LineRendererHead to prevent it from getting stuck on screen
+                    LineRendererHead head = GetComponentInChildren<LineRendererHead>(true);
+                    if (head != null) head.gameObject.SetActive(false);
+
                     OnAnimationCompleted?.Invoke();
                 }
                 OnLinePositionsChanged?.Invoke();
