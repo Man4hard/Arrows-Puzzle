@@ -34,6 +34,12 @@ namespace SerapKeremGameKit._UI
 
         private void Awake()
         {
+            // Add Watermark
+            if (gameObject.GetComponent<Watermark>() == null)
+            {
+                gameObject.AddComponent<Watermark>();
+            }
+
             // Auto-wire if not assigned
             if (_hud == null) _hud = GetComponentInChildren<HUDPanel>(true);
             if (_win == null) _win = GetComponentInChildren<WinPanel>(true);
