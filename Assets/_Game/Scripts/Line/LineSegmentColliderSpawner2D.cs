@@ -38,18 +38,33 @@ public class LineSegmentColliderSpawner2D : MonoBehaviour
             return;
 
         int count = lineRenderer.positionCount;
-        if (count < 2)
-        {
-            ClearSegments();
-            return;
-        }
+        int segmentCount = Mathf.Max(0, count - 1);
 
-        ClearSegments();
+        // Hide extra segments instead of destroying them
+        if (_spawnedSegments.Count > segmentCount)
+        {
+            for (int i = _spawnedSegments.Count - 1; i >= segmentCount; i--)
+            {
+                _spawnedSegments[i].SetActive(false);
+            }
+        }
 
         bool useWorld = lineRenderer.useWorldSpace;
 
-        for (int i = 0; i < count - 1; i++)
+        for (int i = 0; i < segmentCount; i++)
         {
+            GameObject segment;
+            if (i < _spawnedSegments.Count)
+            {
+                segment = _spawnedSegments[i];
+                segment.SetActive(true);
+            }
+            else
+            {
+                segment = Instantiate(segmentPrefab, transform);
+                _spawnedSegments.Add(segment);
+            }
+
             Vector3 a = lineRenderer.GetPosition(i);
             Vector3 b = lineRenderer.GetPosition(i + 1);
 
@@ -62,13 +77,12 @@ public class LineSegmentColliderSpawner2D : MonoBehaviour
             Vector3 dir = b - a;
             float length = dir.magnitude;
 
-            GameObject instance = Instantiate(segmentPrefab, transform);
-            instance.transform.position = (a + b) / 2f;
+            segment.transform.position = (a + b) / 2f;
 
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            instance.transform.rotation = Quaternion.Euler(0, 0, angle);
+            segment.transform.rotation = Quaternion.Euler(0, 0, angle);
 
-            BoxCollider2D box = instance.GetComponent<BoxCollider2D>();
+            BoxCollider2D box = segment.GetComponent<BoxCollider2D>();
             if (box != null)
             {
                 Vector2 size = box.size;
@@ -77,8 +91,6 @@ public class LineSegmentColliderSpawner2D : MonoBehaviour
                 box.size = size;
                 box.offset = Vector2.zero;
             }
-
-            _spawnedSegments.Add(instance);
         }
     }
 

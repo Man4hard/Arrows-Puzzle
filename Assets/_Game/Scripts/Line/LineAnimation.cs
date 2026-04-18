@@ -119,156 +119,114 @@ namespace _Game.Line
                 AnimateForward();
             else
                 AnimateBackward();
-
-            ApplyVisualZOffset();
-        }
-
-        private void ApplyVisualZOffset()
-        {
-            if (Mathf.Abs(_visualZOffset) < 0.001f) return;
-
-            for (int i = 0; i < line.positionCount; i++)
-            {
-                Vector3 pos = line.GetPosition(i);
-                pos.z = _visualZOffset;
-                line.SetPosition(i, pos);
-            }
         }
 
         private void AnimateForward()
         {
-            var count = line.positionCount;
-            var lastPoint = line.GetPosition(count - 1);
+            int count = line.positionCount;
+            float moveDistance = speed * Time.deltaTime;
+            
+            // Optimization: Use a shared array to avoid multiple GetPosition/SetPosition calls
+            Vector3[] positions = new Vector3[count];
+            line.GetPositions(positions);
 
-            lastPoint += _direction.normalized * (speed * Time.deltaTime);
-            line.SetPosition(count - 1, lastPoint);
+            // Move Head
+            positions[count - 1] += _direction.normalized * moveDistance;
 
-            var tailPoint = line.GetPosition(0);
-            var tailDirection = line.GetPosition(1) - tailPoint;
-            tailPoint += tailDirection.normalized * (speed * Time.deltaTime);
-            line.SetPosition(0, tailPoint);
+            // Move Tail - Make it slightly faster so it actually "fades" (shortens) over time
+            float tailMoveDistance = moveDistance * 1.5f; 
+            Vector3 nextPoint = positions[1];
+            positions[0] = Vector3.MoveTowards(positions[0], nextPoint, tailMoveDistance);
 
+            // Apply Z offset if needed in the same pass
+            if (Mathf.Abs(_visualZOffset) > 0.001f)
+            {
+                for (int i = 0; i < count; i++) positions[i].z = _visualZOffset;
+            }
+
+            line.SetPositions(positions);
             OnLinePositionsChanged?.Invoke();
 
-            if (!(Vector2.Distance(tailPoint, line.GetPosition(1)) < 0.1f)) return;
-
-
-            var newCount = count - 1;
-            if (_arrayPool != null)
+            // Check if segment should be removed
+            if (Vector3.Distance(positions[0], nextPoint) < 0.01f)
             {
-                _tempPositionsArray = _arrayPool.GetArray(newCount);
-            }
-            else
-            {
-                _tempPositionsArray = new Vector3[newCount];
-            }
-
-            for (int i = 1; i < count; i++)
-            {
-                _tempPositionsArray[i - 1] = line.GetPosition(i);
-            }
-
-            line.positionCount = newCount;
-            line.SetPositions(_tempPositionsArray);
-
-            if (_arrayPool != null)
-            {
-                _arrayPool.RecycleArray(_tempPositionsArray);
-            }
-            _tempPositionsArray = null;
-
-            OnLinePositionsChanged?.Invoke();
-
-            if (newCount < 2)
-            {
-                _isPlaying = false;
-                enabled = false;
-                OnAnimationCompleted?.Invoke();
+                int newCount = count - 1;
+                if (newCount >= 2)
+                {
+                    line.positionCount = newCount;
+                    // Remaining positions are already correct in our array (indices 1 to count-1)
+                    // But SetPositions needs an array of size newCount
+                    Vector3[] nextPositions = new Vector3[newCount];
+                    Array.Copy(positions, 1, nextPositions, 0, newCount);
+                    line.SetPositions(nextPositions);
+                }
+                else
+                {
+                    line.positionCount = 0;
+                    _isPlaying = false;
+                    enabled = false;
+                    OnAnimationCompleted?.Invoke();
+                }
+                OnLinePositionsChanged?.Invoke();
             }
         }
 
         private void AnimateBackward()
         {
-            int lastIndex = line.positionCount - 1;
-            Vector3 currentHeadPos = line.GetPosition(lastIndex);
-            Vector3 headMoveDir = -_direction.normalized;
+            int count = line.positionCount;
+            float moveDistance = speed * Time.deltaTime;
+            
+            Vector3[] positions = new Vector3[count];
+            line.GetPositions(positions);
+
+            int lastIndex = count - 1;
             Vector3 originHeadPos = positionsOrigin[positionsOrigin.Length - 1];
+            
+            // Move Head Backward
+            positions[lastIndex] = Vector3.MoveTowards(positions[lastIndex], originHeadPos, moveDistance);
 
-            float distToOrigin = Vector2.Distance(currentHeadPos, originHeadPos);
-            float moveDist = speed * Time.deltaTime;
-
-            Vector3 newHeadPos;
-
-            if (distToOrigin > 0.001f)
-            {
-                Vector3 targetPos = originHeadPos;
-                targetPos.z = currentHeadPos.z;
-
-                newHeadPos = Vector3.MoveTowards(currentHeadPos, targetPos, moveDist);
-                line.SetPosition(lastIndex, newHeadPos);
-            }
-            else
-            {
-                newHeadPos = originHeadPos;
-                line.SetPosition(lastIndex, originHeadPos);
-            }
-
-            int countCurrent = line.positionCount;
             int countOrigin = positionsOrigin.Length;
-            int targetIndex = countOrigin - countCurrent;
+            int targetIndex = countOrigin - count;
 
             if (targetIndex >= 0)
             {
-                Vector3 currentTailPos = line.GetPosition(0);
                 Vector3 targetTailPos = positionsOrigin[targetIndex];
+                positions[0] = Vector3.MoveTowards(positions[0], targetTailPos, moveDistance);
 
-                if (Vector2.Distance(currentTailPos, targetTailPos) > 0.1f)
+                if (Vector3.Distance(positions[0], targetTailPos) < 0.01f)
                 {
-                    Vector3 newTailPos = Vector3.MoveTowards(currentTailPos, targetTailPos, speed * Time.deltaTime);
-
-                    newTailPos.z = currentTailPos.z;
-
-                    line.SetPosition(0, newTailPos);
+                    if (targetIndex > 0)
+                    {
+                        // Add point back
+                        int newCount = count + 1;
+                        line.positionCount = newCount;
+                        Vector3[] nextPositions = new Vector3[newCount];
+                        nextPositions[0] = positionsOrigin[targetIndex - 1];
+                        Array.Copy(positions, 0, nextPositions, 1, count);
+                        line.SetPositions(nextPositions);
+                    }
+                    else if (Vector3.Distance(positions[lastIndex], originHeadPos) < 0.01f)
+                    {
+                        _isPlaying = false;
+                        enabled = false;
+                        OnAnimationCompleted?.Invoke();
+                    }
                 }
                 else
                 {
-                    targetTailPos.z = currentTailPos.z;
-                    line.SetPosition(0, targetTailPos);
-
-                    if (targetIndex > 0)
-                    {
-                        int newCount = countCurrent + 1;
-                        if (_arrayPool != null)
-                            _tempPositionsArray = _arrayPool.GetArray(newCount);
-                        else
-                            _tempPositionsArray = new Vector3[newCount];
-
-                        _tempPositionsArray[0] = targetTailPos;
-
-                        for (int i = 0; i < countCurrent; i++)
-                        {
-                            _tempPositionsArray[i + 1] = line.GetPosition(i);
-                        }
-
-                        line.positionCount = newCount;
-                        line.SetPositions(_tempPositionsArray);
-
-                        if (_arrayPool != null)
-                        {
-                            _arrayPool.RecycleArray(_tempPositionsArray);
-                            _tempPositionsArray = null;
-                        }
-                    }
-                    else
-                    {
-                        if (Vector2.Distance(newHeadPos, originHeadPos) < 0.01f)
-                        {
-                            _isPlaying = false;
-                            enabled = false;
-                            OnAnimationCompleted?.Invoke();
-                        }
-                    }
+                    line.SetPositions(positions);
                 }
+                
+                // Apply Z offset
+                if (Mathf.Abs(_visualZOffset) > 0.001f)
+                {
+                    int currentCount = line.positionCount;
+                    Vector3[] zPos = new Vector3[currentCount];
+                    line.GetPositions(zPos);
+                    for (int i = 0; i < currentCount; i++) zPos[i].z = _visualZOffset;
+                    line.SetPositions(zPos);
+                }
+                
                 OnLinePositionsChanged?.Invoke();
             }
         }
