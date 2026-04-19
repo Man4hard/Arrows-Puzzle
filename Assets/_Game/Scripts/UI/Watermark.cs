@@ -20,7 +20,9 @@ namespace _Game.UI
             text.text = "Developed By TAYYAB";
             text.fontSize = 24;
             text.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray with some transparency
-            text.alignment = TextAlignmentOptions.BottomCenter;
+            text.alignment = TextAlignmentOptions.Bottom; // Simplified for broader compatibility
+            text.horizontalAlignment = HorizontalAlignmentOptions.Center;
+            text.verticalAlignment = VerticalAlignmentOptions.Bottom;
 
             RectTransform rectTransform = watermarkGO.GetComponent<RectTransform>();
             rectTransform.anchorMin = new Vector2(0.5f, 0);
