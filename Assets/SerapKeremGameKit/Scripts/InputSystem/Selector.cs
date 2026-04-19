@@ -7,6 +7,7 @@ using SerapKeremGameKit._InputSystem.Data;
 
 namespace SerapKeremGameKit._InputSystem
 {
+    [DefaultExecutionOrder(-90)]
     public class Selector : MonoBehaviour
     {
         [Title("Selector Settings")]
@@ -16,6 +17,7 @@ namespace SerapKeremGameKit._InputSystem
         [SerializeField] private LayerMask _selectableLayerMash;
         [SerializeField, Range(10f, 1000f)] private float _raycastDistance = 500f;
         [SerializeField] private bool _use2DColliders = true;
+        [SerializeField] private float _selectionRadius2D = 0.5f; // Forgiving touch radius
 
         [Header("Debug")]
         [SerializeField] private bool _enableDebugRay = true;
@@ -80,7 +82,8 @@ namespace SerapKeremGameKit._InputSystem
             Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(screenPos);
             mouseWorldPos.z = 0f;
 
-            Collider2D hitCollider = Physics2D.OverlapPoint(mouseWorldPos, _selectableLayerMash);
+            // Use OverlapCircle instead of OverlapPoint for better touch responsiveness
+            Collider2D hitCollider = Physics2D.OverlapCircle(mouseWorldPos, _selectionRadius2D, _selectableLayerMash);
             
             if (hitCollider != null)
             {

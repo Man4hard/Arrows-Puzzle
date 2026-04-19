@@ -4,6 +4,7 @@ using SerapKeremGameKit._InputSystem.Data;
 
 namespace SerapKeremGameKit._InputSystem
 {
+    [DefaultExecutionOrder(-100)]
     public class InputHandler : MonoSingleton<InputHandler>
     {
         [Header("Input Settings")]
