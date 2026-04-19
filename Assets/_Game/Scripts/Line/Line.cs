@@ -136,6 +136,8 @@ namespace _Game.Line
             if (_lineHead != null && _lineHead.gameObject != null)
             {
                 _lineHead.gameObject.SetActive(true);
+                // Unsubscribe first to prevent double-subscription if called multiple times
+                _lineHead.OnHeadCollision -= HandleHeadCollision;
                 _lineHead.Initialize(_lineRenderer, this);
                 _lineHead.OnHeadCollision += HandleHeadCollision;
                 _headCollisionDetector = _lineHead.GetComponent<LineHeadCollisionDetector>();
@@ -223,6 +225,10 @@ namespace _Game.Line
                 {
                     _materialHandler.ResetToOriginalColors();
                 }
+
+                // Ensure the line head is reactive again after moving back
+                InitializeLineHead();
+                
                 return;
             }
 
