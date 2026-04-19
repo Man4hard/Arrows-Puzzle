@@ -148,14 +148,12 @@ namespace _Game.Line
             OnLinePositionsChanged?.Invoke();
 
             // Check if segment should be removed
-            if (Vector3.Distance(positions[0], nextPoint) < 0.01f)
+            if (Vector3.Distance(positions[0], nextPoint) < 0.05f) // Increased threshold for stability
             {
                 int newCount = count - 1;
                 if (newCount >= 2)
                 {
                     line.positionCount = newCount;
-                    // Remaining positions are already correct in our array (indices 1 to count-1)
-                    // But SetPositions needs an array of size newCount
                     Vector3[] nextPositions = new Vector3[newCount];
                     Array.Copy(positions, 1, nextPositions, 0, newCount);
                     line.SetPositions(nextPositions);
@@ -163,8 +161,7 @@ namespace _Game.Line
                 else
                 {
                     line.positionCount = 0;
-                    _isPlaying = false;
-                    enabled = false;
+                    Stop(); // Use Stop() to ensure all flags are cleaned up
                     
                     // Force disable LineRendererHead to prevent it from getting stuck on screen
                     LineRendererHead head = GetComponentInChildren<LineRendererHead>(true);
@@ -198,7 +195,7 @@ namespace _Game.Line
                 Vector3 targetTailPos = positionsOrigin[targetIndex];
                 positions[0] = Vector3.MoveTowards(positions[0], targetTailPos, moveDistance);
 
-                if (Vector3.Distance(positions[0], targetTailPos) < 0.01f)
+                if (Vector3.Distance(positions[0], targetTailPos) < 0.05f) // Increased threshold
                 {
                     if (targetIndex > 0)
                     {
@@ -210,10 +207,9 @@ namespace _Game.Line
                         Array.Copy(positions, 0, nextPositions, 1, count);
                         line.SetPositions(nextPositions);
                     }
-                    else if (Vector3.Distance(positions[lastIndex], originHeadPos) < 0.01f)
+                    else if (Vector3.Distance(positions[lastIndex], originHeadPos) < 0.05f)
                     {
-                        _isPlaying = false;
-                        enabled = false;
+                        Stop(); // Ensure clean stop
                         OnAnimationCompleted?.Invoke();
                     }
                 }

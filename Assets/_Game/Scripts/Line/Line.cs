@@ -27,7 +27,15 @@ namespace _Game.Line
         public LineAnimation Animation => _animation;
         public LineClick Click => _click;
         public bool IsInitialized { get; private set; }
-        public bool IsClickable => !_hasCollided && (_animation == null || !_animation.IsPlaying || (_animation.IsPlaying && _animation.IsForward));
+        public bool IsClickable
+        {
+            get
+            {
+                if (_hasCollided) return false;
+                if (_animation == null) return true;
+                return !_animation.IsPlaying;
+            }
+        }
 
         private LineManager _lineManager;
         private Vector3ArrayPool _arrayPool;
@@ -211,33 +219,44 @@ namespace _Game.Line
         {
             if (_animation == null) return;
 
+            // Reset collision state regardless of direction to be safe, 
+            // but especially if we were moving backward (returning to start)
             if (!_animation.IsForward)
             {
-                _hasCollided = false;
-                _hasLostLifeForThisCollision = false;
-
-                if (_animation != null)
-                {
-                    _animation.VisualZOffset = 0f;
-                }
-
-                if (_materialHandler != null)
-                {
-                    _materialHandler.ResetToOriginalColors();
-                }
-
-                // Ensure the line head is reactive again after moving back
-                InitializeLineHead();
-                
+                ForceResetState();
                 return;
             }
 
-            if (_hasCollided) return;
+            if (_hasCollided)
+            {
+                ForceResetState();
+                return;
+            }
 
+            // Normal forward completion
             if (_lineManager != null)
             {
                 _lineManager.UnregisterLine(this);
             }
+        }
+
+        private void ForceResetState()
+        {
+            _hasCollided = false;
+            _hasLostLifeForThisCollision = false;
+
+            if (_animation != null)
+            {
+                _animation.VisualZOffset = 0f;
+            }
+
+            if (_materialHandler != null)
+            {
+                _materialHandler.ResetToOriginalColors();
+            }
+
+            InitializeLineHead();
+            ResetHeadCollision();
         }
 
         private void HandleHeadCollision(Collider2D other)
