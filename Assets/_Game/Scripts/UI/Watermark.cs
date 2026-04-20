@@ -17,7 +17,7 @@ namespace _Game.UI
             watermarkGO.transform.SetParent(this.transform, false);
 
             TextMeshProUGUI text = watermarkGO.AddComponent<TextMeshProUGUI>();
-            text.text = "Developed By TAYYAB";
+            text.text = "Arrow Puzzle";
             text.fontSize = 24;
             text.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray with some transparency
             text.alignment = TextAlignmentOptions.Bottom; // Simplified for broader compatibility
