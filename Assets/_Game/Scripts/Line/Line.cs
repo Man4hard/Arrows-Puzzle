@@ -219,21 +219,21 @@ namespace _Game.Line
         {
             if (_animation == null) return;
 
-            // Reset collision state regardless of direction to be safe, 
-            // but especially if we were moving backward (returning to start)
+            // Moving backward (returning to start after collision) - reset state so line can be clicked again
             if (!_animation.IsForward)
             {
                 ForceResetState();
                 return;
             }
 
+            // Forward animation completed but had collision - reset state
             if (_hasCollided)
             {
                 ForceResetState();
                 return;
             }
 
-            // Normal forward completion
+            // Normal forward completion - line successfully cleared
             if (_lineManager != null)
             {
                 _lineManager.UnregisterLine(this);
