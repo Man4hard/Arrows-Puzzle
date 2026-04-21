@@ -9,7 +9,8 @@ namespace _Game.Line
     {
         private LineRenderer line;
         [SerializeField] private float speed = 5f;
-        [SerializeField] private string _movementSoundKey = "";
+        [SerializeField] private string _movementSoundKey = "click";
+        [SerializeField] private AudioClip _clickSoundClip;
 
         private bool _isPlaying;
         private bool _forward;
@@ -19,6 +20,7 @@ namespace _Game.Line
         private Vector3[] _tempPositionsArray;
         private Vector3ArrayPool _arrayPool;
         private float _visualZOffset;
+        private AudioSource _audioSource;
 
         public bool IsPlaying => _isPlaying;
         public bool IsForward => _forward;
@@ -39,6 +41,19 @@ namespace _Game.Line
             if (lineRenderer == null) return;
 
             line = lineRenderer;
+            
+            // Setup AudioSource for click sound
+            _audioSource = gameObject.GetComponent<AudioSource>();
+            if (_audioSource == null)
+            {
+                _audioSource = gameObject.AddComponent<AudioSource>();
+                _audioSource.playOnAwake = false;
+                _audioSource.spatialBlend = 0f;
+            }
+            if (_clickSoundClip != null)
+            {
+                _audioSource.clip = _clickSoundClip;
+            }
 
             var count = line.positionCount;
             if (count < 2) return;
@@ -72,6 +87,12 @@ namespace _Game.Line
             {
                 OnAnimationStarted?.Invoke(forwardDirection);
 
+                // Play click sound directly
+                if (_audioSource != null && _audioSource.clip != null)
+                {
+                    _audioSource.Play();
+                }
+                
                 if (AudioManager.IsInitialized && !string.IsNullOrEmpty(_movementSoundKey))
                     AudioManager.Instance.Play(_movementSoundKey);
                 if (HapticManager.IsInitialized)
