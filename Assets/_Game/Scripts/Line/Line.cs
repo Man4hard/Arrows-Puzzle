@@ -170,6 +170,7 @@ namespace _Game.Line
                 _animation.OnAnimationStarted += HandleAnimationStarted;
                 _animation.OnAnimationStopped += HandleAnimationStopped;
                 _animation.OnAnimationCompleted += HandleAnimationCompleted;
+                _animation.OnBackwardAnimationCompleted += HandleBackwardAnimationCompleted;
             }
         }
 
@@ -181,6 +182,7 @@ namespace _Game.Line
                 _animation.OnAnimationStarted -= HandleAnimationStarted;
                 _animation.OnAnimationStopped -= HandleAnimationStopped;
                 _animation.OnAnimationCompleted -= HandleAnimationCompleted;
+                _animation.OnBackwardAnimationCompleted -= HandleBackwardAnimationCompleted;
             }
         }
 
@@ -219,13 +221,6 @@ namespace _Game.Line
         {
             if (_animation == null) return;
 
-            // Moving backward (returning to start after collision) - reset state so line can be clicked again
-            if (!_animation.IsForward)
-            {
-                ForceResetState();
-                return;
-            }
-
             // Forward animation completed but had collision - reset state
             if (_hasCollided)
             {
@@ -238,6 +233,13 @@ namespace _Game.Line
             {
                 _lineManager.UnregisterLine(this);
             }
+        }
+
+        private void HandleBackwardAnimationCompleted()
+        {
+            // When backward animation completes (line returned to start after collision),
+            // reset state so the line can be clicked again
+            ForceResetState();
         }
 
         private void ForceResetState()

@@ -34,6 +34,7 @@ namespace _Game.Line
         public event Action<bool> OnAnimationStarted;
         public event Action OnAnimationStopped;
         public event Action OnAnimationCompleted;
+        public event Action OnBackwardAnimationCompleted;
         public event Action OnLinePositionsChanged;
 
         public void Initialize(LineRenderer lineRenderer, Vector3ArrayPool arrayPool = null)
@@ -231,7 +232,7 @@ namespace _Game.Line
                     else if (Vector3.Distance(positions[lastIndex], originHeadPos) < 0.05f)
                     {
                         Stop(); // Ensure clean stop
-                        OnAnimationCompleted?.Invoke();
+                        OnBackwardAnimationCompleted?.Invoke();
                     }
                 }
                 else
