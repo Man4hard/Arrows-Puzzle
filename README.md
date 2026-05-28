@@ -56,7 +56,7 @@ The core challenge lies in **timing your clicks correctly** to prevent collision
 * 🏆 **Win / Lose Conditions**
   Clear all lines to win; lose all lives to fail the level.
 * 📊 **Level Progression**
-  25 carefully designed levels with increasing difficulty.
+  75 carefully designed and procedurally chaotic levels with increasing difficulty.
 
 ---
 

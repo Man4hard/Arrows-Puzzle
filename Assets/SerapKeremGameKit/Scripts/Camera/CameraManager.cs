@@ -11,7 +11,10 @@ namespace SerapKeremGameKit._Camera
         [SerializeField] private Vector3 _followOffset;
 		[SerializeField] private float _followLerp = 10f; // kept for backward compat (deprecated)
 		[SerializeField] private bool _snapOnStart = true;
-        
+
+        [Header("Zoom Settings")]
+        [SerializeField] private float _zoomSpeed = 5f;
+        [SerializeField] private float _pinchZoomSpeed = 0.05f;
         [Header("Camera Fitting Settings")]
         [SerializeField] private float _padding = 2f;
         [SerializeField] private float _minOrthographicSize = 5f;
@@ -40,6 +43,40 @@ namespace SerapKeremGameKit._Camera
 			{
 				SnapFollow();
 			}
+        }
+
+        private void Update()
+        {
+            if (_gameCamera == null) return;
+            Camera cam = _gameCamera.GetComponent<Camera>();
+            if (cam != null && cam.orthographic)
+            {
+                // Mouse Scroll Zoom
+                float scroll = Input.GetAxis("Mouse ScrollWheel");
+                if (scroll != 0f)
+                {
+                    cam.orthographicSize -= scroll * _zoomSpeed;
+                    cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, _minOrthographicSize, _maxOrthographicSize);
+                }
+
+                // Touch Pinch Zoom
+                if (Input.touchCount == 2)
+                {
+                    Touch touchZero = Input.GetTouch(0);
+                    Touch touchOne = Input.GetTouch(1);
+
+                    Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+                    Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+
+                    float prevMagnitude = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+                    float currentMagnitude = (touchZero.position - touchOne.position).magnitude;
+
+                    float difference = currentMagnitude - prevMagnitude;
+
+                    cam.orthographicSize -= difference * _pinchZoomSpeed;
+                    cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, _minOrthographicSize, _maxOrthographicSize);
+                }
+            }
         }
 
 
