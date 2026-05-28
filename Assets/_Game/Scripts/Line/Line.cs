@@ -208,7 +208,7 @@ namespace _Game.Line
 
         private void HandleAnimationStopped()
         {
-            if (_animation != null && _animation.IsForward)
+            if (_animation != null && _animation.IsForward && !_hasCollided)
             {
                 _hasCollided = false;
                 _hasLostLifeForThisCollision = false;

@@ -27,10 +27,6 @@ namespace _Game.Line
         protected override void OnGet(Vector3ArrayWrapper item)
         {
             item.gameObject.SetActive(true);
-            if (item.Array != null)
-            {
-                _arrayToWrapper[item.Array] = item;
-            }
         }
 
         protected override void OnRecycle(Vector3ArrayWrapper item)
@@ -64,6 +60,11 @@ namespace _Game.Line
             if (wrapper.Array == null || wrapper.Array.Length < length)
             {
                 wrapper.SetLength(length);
+            }
+
+            if (wrapper.Array != null)
+            {
+                _arrayToWrapper[wrapper.Array] = wrapper;
             }
 
             return wrapper.Array;
