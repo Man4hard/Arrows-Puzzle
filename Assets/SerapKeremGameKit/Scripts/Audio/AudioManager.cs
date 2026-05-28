@@ -28,11 +28,12 @@ namespace SerapKeremGameKit._Audio
         {
             base.Awake();
             if (Instance != this) return;
+            // Load user preference for sound
+            _enabled = PlayerPrefs.GetInt(PreferencesKeys.SettingsSound, 1) == 1;
+
             BuildRegistry();
             EnsurePool();
             EnsureMusicSource();
-            // Load user preference for sound
-            _enabled = PlayerPrefs.GetInt(PreferencesKeys.SettingsSound, 1) == 1;
         }
 
         public void Play(string key)
@@ -53,6 +54,7 @@ namespace SerapKeremGameKit._Audio
             _musicSource.volume = 1f;
             _musicSource.loop = true;
             _musicSource.spatialBlend = 0f;
+            _musicSource.mute = !_enabled;
             _musicSource.Play();
         }
 
@@ -69,9 +71,9 @@ namespace SerapKeremGameKit._Audio
             _enabled = isEnabled;
             PlayerPrefs.SetInt(PreferencesKeys.SettingsSound, _enabled ? 1 : 0);
             PlayerPrefs.Save();
-            if (!_enabled)
+            if (_musicSource != null)
             {
-                StopMusic();
+                _musicSource.mute = !_enabled;
             }
         }
 
@@ -157,6 +159,7 @@ namespace SerapKeremGameKit._Audio
                 _musicSource.loop = true;
                 _musicSource.spatialBlend = 0f;
             }
+            _musicSource.mute = !_enabled;
         }
     }
 }
