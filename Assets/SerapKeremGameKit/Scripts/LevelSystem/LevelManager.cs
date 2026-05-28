@@ -228,7 +228,10 @@ namespace SerapKeremGameKit._Managers
             public static int Compare(string x, string y)
             {
                 if (x == null || y == null) return 0;
-                return string.Compare(x, y, System.StringComparison.OrdinalIgnoreCase);
+                return string.Compare(
+                    System.Text.RegularExpressions.Regex.Replace(x, "[0-9]+", match => match.Value.PadLeft(10, '0')),
+                    System.Text.RegularExpressions.Regex.Replace(y, "[0-9]+", match => match.Value.PadLeft(10, '0')),
+                    System.StringComparison.OrdinalIgnoreCase);
             }
         }
 
