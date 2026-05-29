@@ -233,6 +233,10 @@ namespace _Game.Line
                         Stop();
                         OnBackwardAnimationCompleted?.Invoke();
                     }
+                    else
+                    {
+                        line.SetPositions(positions);
+                    }
                 }
                 else
                 {
