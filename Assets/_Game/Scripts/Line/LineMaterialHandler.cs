@@ -16,9 +16,31 @@ namespace _Game.Line
         private Dictionary<Component, Color> _originalColors = new Dictionary<Component, Color>();
         private Coroutine _colorResetCoroutine;
 
+        private static readonly Color[] PastelColors = new Color[]
+        {
+            new Color(0.65f, 0.93f, 0.79f), // Pastel Mint
+            new Color(0.68f, 0.85f, 0.90f), // Pastel Baby Blue
+            new Color(1.00f, 0.60f, 0.60f), // Pastel Coral Red
+            new Color(0.99f, 0.93f, 0.65f), // Pastel Lemon
+            new Color(0.82f, 0.73f, 0.91f), // Pastel Lavender
+            new Color(1.00f, 0.71f, 0.80f), // Pastel Rose
+            new Color(1.00f, 0.80f, 0.60f), // Pastel Peach
+            new Color(0.55f, 0.88f, 0.82f)  // Pastel Aqua
+        };
+
         private void Awake()
         {
             StoreOriginalColors();
+            
+            Color randomPastel = PastelColors[UnityEngine.Random.Range(0, PastelColors.Length)];
+            SetColor(randomPastel);
+            
+            // Update cache to the new pastel color
+            List<Component> keys = new List<Component>(_originalColors.Keys);
+            foreach (var key in keys)
+            {
+                _originalColors[key] = randomPastel;
+            }
         }
 
         private void StoreOriginalColors()
