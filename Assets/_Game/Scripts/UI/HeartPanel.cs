@@ -33,6 +33,12 @@ namespace _Game.UI
                 Debug.LogWarning($"{name}: Expected {expectedHearts} hearts, but found {_hearts.Count}. Please assign {expectedHearts} HeartUI components in Inspector.", this);
             }
 
+            UnityEngine.UI.Image bgImage = GetComponent<UnityEngine.UI.Image>();
+            if (bgImage != null)
+            {
+                bgImage.enabled = false;
+            }
+
             foreach (var heart in _hearts)
             {
                 if (heart != null)
