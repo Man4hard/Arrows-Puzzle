@@ -204,6 +204,7 @@ namespace _Game.Line
 
             int lastIndex = count - 1;
             Vector3 originHeadPos = positionsOrigin[positionsOrigin.Length - 1];
+            originHeadPos.z = positions[lastIndex].z;
             
             // Move Head Backward
             positions[lastIndex] = Vector3.MoveTowards(positions[lastIndex], originHeadPos, moveDistance);
@@ -214,6 +215,7 @@ namespace _Game.Line
             if (targetIndex >= 0)
             {
                 Vector3 targetTailPos = positionsOrigin[targetIndex];
+                targetTailPos.z = positions[0].z;
                 positions[0] = Vector3.MoveTowards(positions[0], targetTailPos, moveDistance);
 
                 if (Vector3.Distance(positions[0], targetTailPos) < 0.05f)
