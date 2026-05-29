@@ -28,37 +28,9 @@ namespace _Game.UI
             if (_isInitialized) return;
 
             int expectedHearts = MaxHearts;
-            int totalHearts = _hearts.Count;
-
-            if (expectedHearts < totalHearts)
+            if (_hearts.Count != expectedHearts)
             {
-                RectTransform panelRect = GetComponent<RectTransform>();
-                if (panelRect != null)
-                {
-                    float ratio = (float)expectedHearts / totalHearts;
-                    
-                    // Center the panel but shrink its width
-                    float width = panelRect.anchorMax.x - panelRect.anchorMin.x;
-                    float centerX = (panelRect.anchorMin.x + panelRect.anchorMax.x) / 2f;
-                    float newWidth = width * ratio;
-                    
-                    panelRect.anchorMin = new Vector2(centerX - newWidth / 2f, panelRect.anchorMin.y);
-                    panelRect.anchorMax = new Vector2(centerX + newWidth / 2f, panelRect.anchorMax.y);
-                    
-                    // Adjust children anchors so they fill the new smaller panel
-                    for (int i = 0; i < expectedHearts; i++)
-                    {
-                        if (_hearts[i] != null)
-                        {
-                            RectTransform childRect = _hearts[i].GetComponent<RectTransform>();
-                            if (childRect != null)
-                            {
-                                childRect.anchorMin = new Vector2(childRect.anchorMin.x / ratio, childRect.anchorMin.y);
-                                childRect.anchorMax = new Vector2(childRect.anchorMax.x / ratio, childRect.anchorMax.y);
-                            }
-                        }
-                    }
-                }
+                Debug.LogWarning($"{name}: Expected {expectedHearts} hearts, but found {_hearts.Count}. Please assign {expectedHearts} HeartUI components in Inspector.", this);
             }
 
             foreach (var heart in _hearts)
