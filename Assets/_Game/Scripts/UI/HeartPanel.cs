@@ -46,12 +46,21 @@ namespace _Game.UI
 
         public void UpdateHearts(int activeLives)
         {
+            int max = MaxHearts;
             for (int i = 0; i < _hearts.Count; i++)
             {
                 if (_hearts[i] != null)
                 {
-                    bool isActive = i < activeLives;
-                    _hearts[i].SetActive(isActive);
+                    if (i >= max)
+                    {
+                        _hearts[i].gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        _hearts[i].gameObject.SetActive(true);
+                        bool isActive = i < activeLives;
+                        _hearts[i].SetActive(isActive);
+                    }
                 }
             }
         }
