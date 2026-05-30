@@ -108,6 +108,10 @@ namespace _Game.Line
                 if (kvp.Key is LineRenderer lineRenderer && lineRenderer.material != null)
                 {
                     lineRenderer.material.color = kvp.Value;
+                    if (lineRenderer.material.HasProperty("_BaseColor"))
+                    {
+                        lineRenderer.material.SetColor("_BaseColor", kvp.Value);
+                    }
                 }
                 else if (kvp.Key is SpriteRenderer spriteRenderer)
                 {
@@ -136,6 +140,10 @@ namespace _Game.Line
                     if (lineRenderer.material != null)
                     {
                         lineRenderer.material.color = color;
+                        if (lineRenderer.material.HasProperty("_BaseColor"))
+                        {
+                            lineRenderer.material.SetColor("_BaseColor", color);
+                        }
                     }
                 }
                 else if (renderer is SpriteRenderer spriteRenderer)
