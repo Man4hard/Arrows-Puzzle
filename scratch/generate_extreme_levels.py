@@ -62,8 +62,10 @@ S = {
 }
 
 def gen_id(seed: str) -> str:
+    """Generate a deterministic 17-digit fileID from a seed string."""
     h = hashlib.sha256(seed.encode()).hexdigest()
-    num = int(h[:17], 16) % (9 * 10**18) + 10**18
+    # 9 * 10**17 is safely below long.MaxValue (9,223,372,036,854,775,807)
+    num = int(h[:15], 16) % (9 * 10**17) + 10**17
     return str(num)
 
 def gen_guid() -> str:
@@ -427,7 +429,7 @@ Transform:
   m_GameObject: {{fileID: {S['bg_go']}}}
   serializedVersion: 2
   m_LocalRotation: {{x: -0.5, y: 0.5, z: -0.5, w: 0.5}}
-  m_LocalPosition: {{x: 0, y: 0, z: 0}}
+  m_LocalPosition: {{x: 0, y: 2.5, z: 0}}
   m_LocalScale: {{x: 3, y: 3, z: 3}}
   m_ConstrainProportionsScale: 1
   m_Children: []
