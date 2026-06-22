@@ -91,7 +91,10 @@ namespace _Game.Line
                 // Play click sound directly
                 if (_audioSource != null && _audioSource.clip != null)
                 {
-                    _audioSource.Play();
+                    if (AudioManager.IsInitialized && AudioManager.Instance.IsEnabled())
+                    {
+                        _audioSource.Play();
+                    }
                 }
                 
                 if (AudioManager.IsInitialized && !string.IsNullOrEmpty(_movementSoundKey))
@@ -216,7 +219,8 @@ namespace _Game.Line
             {
                 Vector3 targetTailPos = positionsOrigin[targetIndex];
                 targetTailPos.z = positions[0].z;
-                positions[0] = Vector3.MoveTowards(positions[0], targetTailPos, moveDistance);
+                float tailMoveDistance = moveDistance * 1.5f;
+                positions[0] = Vector3.MoveTowards(positions[0], targetTailPos, tailMoveDistance);
 
                 if (Vector3.Distance(positions[0], targetTailPos) < 0.05f)
                 {
